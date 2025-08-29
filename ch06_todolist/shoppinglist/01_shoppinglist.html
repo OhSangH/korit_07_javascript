@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping 리스트</title>
+    <link rel="stylesheet" href="./01_shoppinglist.css" />
+  </head>
+  <body>
+    <div class="todo-container">
+      <h1>나의 ToDo List</h1>
+      <div class="input-group">
+        <input
+          type="text"
+          id="item-input"
+          placeholder="구매할 물품을 입력하세요"
+        />
+        <input type="number" id="price-input" placeholder="가격" min="0" />
+        <button id="add-btn">추가</button>
+      </div>
+      <ul id="shopping-list" class="shopping-list"></ul>
+    </div>
+    <script>
+      //DOM 가져오기
+      const itemInput = document.getElementById("item-input");
+      const priceInput = document.getElementById("price-input");
+      const addBtn = document.getElementById("add-btn");
+      const shoppingList = document.getElementById("shopping-list");
+
+      let shoppingItems =
+        JSON.parse(localStorage.getItem("shopping-items")) || [];
+
+      function renderShoppingList() {
+        shoppingList.innerHTML = "";
+        shoppingItems.forEach((item, index) => {
+          const li = document.createElement("li");
+          li.className = "todo-item";
+          if (item.completed) {
+            li.classList.add("completed");
+          }
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = item.completed;
+
+          const itemTextSpan = document.createElement("span");
+          itemTextSpan.className = "item-text";
+          itemTextSpan.textContent = item.text;
+
+          const priceSpan = document.createElement("span");
+          priceSpan.className = "price";
+          priceSpan.textContent = item.price ? `${item.price} 원` : "";
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-btn";
+          deleteBtn.innerHTML = "&times";
+
+          li.append(itemTextSpan);
+          li.append(priceSpan);
+          li.append(deleteBtn);
+
+          shoppingList.append(li);
+
+          checkbox.addEventListener("change", () => {
+            shoppingItems[index].completed = checkbox.checked;
+            li.classList.toggle("completed", checkbox.checked);
+            saveShoppingItems();
+          });
+
+          deleteBtn.addEventListener("click", () => {
+            shoppingItems.splice(index, 1);
+            saveShoppingItems();
+            renderShoppingList(); // 삭제 버튼을 눌렀을 때 renderShoppingList내에서 다시 재귀
+          });
+        });
+      }
+
+      function saveShoppingItems() {
+        localStorage.setItem("shopping-items", JSON.stringify(shoppingItems));
+      }
+
+      function addShoppingItem() {
+        const itemText = itemInput.value.trim();
+        const itemPrice = priceInput.value.trim();
+
+        if (itemText === "") {
+          alert("구매할 물품을 추가해 주세요");
+          return;
+        }
+        if (itemPrice === "") {
+          alert("물품 가격을 추가해 주세요");
+          return;
+        }
+
+        const newItem = {
+          text: itemText,
+          price: itemPrice,
+          completed: false,
+        };
+
+        shoppingItems.push(newItem);
+
+        itemInput.value = "";
+        priceInput.value = "";
+        saveShoppingItems();
+        renderShoppingList();
+      }
+
+      addBtn.addEventListener("click", addShoppingItem);
+      /*
+        소괄호의 유무의 따른 함수 실행방식의 차이가 있는데
+        '함수명()'의 경우 함수의 return값이 전달 되는데
+        '함수명'의 경우에는 함수 자체를 전달하는것이다.
+      */
+
+      itemInput.addEventListener("keydown", (event) => {
+        if (event.key == "Enter") {
+          addShoppingItem(); // input태그에 Enter 키 입력을 감지하면 addTodo(); 함수 추가
+        }
+      });
+
+      priceInput.addEventListener("keydown", (event) => {
+        if (event.key == "Enter") {
+          addShoppingItem(); // input태그에 Enter 키 입력을 감지하면 addTodo(); 함수 추가
+        }
+      });
+
+      window.onload = renderShoppingList();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+@import url(/ch06_todolist/01_todolist.css);
+
+.input-group input {
+  width: 0;
+}
+
+#price-input {
+  flex-grow: 0.5;
+}
